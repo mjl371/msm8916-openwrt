@@ -60,12 +60,13 @@ and update it when a unit arrives, dies or is repaired.
 | `uz801` | UZ801 (v3) | `yiming,uz801-v3` | @isprogrammer, @giraygokirmak | bench (@isprogrammer) + field, daily in-vehicle (@giraygokirmak) | patches 803, 851; `diffconfigs/uz801` |
 | `ufi003` | UFI003 MB V02 | `ufi003,mb-v02` | @isprogrammer | bench | patch 852; `diffconfigs/ufi003` |
 | `jz02` | JZ02 Battery MiFi | `jz02,generic` | @GargoilXD | bench (@GargoilXD) | patch 868; `diffconfigs/jz02`; `sim-select`, `sim-test`, `20-usb0-bridge` |
+| `jz02v10` | THWC JZ02V10 4G LTE Stick | `jz02v10,generic` (upstream `thwc,jz02v10`) | @akbar-npj | **none — needs a tester** | patch 869; `diffconfigs/jz02v10`; `sim-select-jz02v10` |
 | `uf896` | UF896 (v1.1) | `uf896,v1.1` | @akbar-npj | **none — needs a tester** | patch 867; `diffconfigs/uf896` |
 
 Boards with **no working unit** (`dead` or `none`) are still maintained — the
 code is kept current and the image builds — but nothing in a release has been
 flashed on them, and a bug there is found by a user, not by us. As of r8 that is
-`mf800b`, `uf02` and `uf896`; `ufi001b` is `dead` and joins them until the repair
+`mf800b`, `uf02`, `uf896` and `jz02v10`; `ufi001b` is `dead` and joins them until the repair
 lands. Those rows are what issue
 [#13](https://github.com/akbar-npj/msm8916-openwrt/issues/13) is asking for, and
 a second owner on any of them turns a "reported by a user" bug into a tested one.

@@ -76,6 +76,9 @@ led_role_default()
 		wan)
 			case "$(cat "$BOARD_NAME_FILE" 2>/dev/null)" in
 				*hmuf02v5*) led_pick green:wan green:wlan ;;
+				# JZ02V10 has no green WAN lamp: its cellular
+				# light is the blue line on GPIO7 (patch 869).
+				*jz02v10*)  led_pick blue:wan green:wan ;;
 				*)          led_pick green:wan ;;
 			esac
 			;;

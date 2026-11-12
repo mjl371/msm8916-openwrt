@@ -198,4 +198,28 @@ define Device/generic-jz02
 endef
 TARGET_DEVICES += generic-jz02
 
+# THWC JZ02V10 — a different board from generic-jz02: four one-hot SIM switch
+# lines (GPIO 1 / 20 / 22 / 23) instead of three lines plus a hot-detect pulse,
+# a Restart key on GPIO37, LEDs on 8 / 6 / 7 and no verified battery.  Ported
+# from the openstick-jz02v10 device tree; see Docs/Boards/JZ02V10.md.
+define Device/thwc-jz02v10
+	$(Device/msm8916)
+	DEVICE_VENDOR := THWC
+	DEVICE_MODEL := JZ02V10 4G LTE Stick
+	DEVICE_DTS := msm8916-thwc-jz02v10
+	# Second entry keeps sysupgrade working for users coming from the
+	# openstick image, whose board_name is the upstream "thwc,jz02v10".
+	SUPPORTED_DEVICES := jz02v10,generic thwc,jz02v10
+	FILESYSTEMS := squashfs
+	# eMMC size is not measured yet: keep the 4 GB stick default (the safe
+	# side -- flash.sh reads the real size at flash time).
+	# misc + recovery so Reboot-to-Recovery works without an EDL button.
+	GPT_RECOVERY := 1
+	DEVICE_PACKAGES := msm89xx-scripts wpad-basic-wolfssl rmtfs uci-usb-gadget \
+		block-mount f2fs-tools tar \
+		msm-firmware-dumper reboot-edl qcom-carrier-autocfg \
+		diag-efs diag-logtool msm89xx-firmware-upgrade luci-app-update-notify luci-app-led-setup
+endef
+TARGET_DEVICES += thwc-jz02v10
+
 endif

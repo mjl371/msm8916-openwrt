@@ -28,6 +28,13 @@ msm89xx/base-files/etc/init.d/sim-select                           @GargoilXD @a
 msm89xx/base-files/usr/sbin/sim-test                               @GargoilXD @akbar-npj
 msm89xx/base-files/etc/hotplug.d/net/20-usb0-bridge                @GargoilXD @akbar-npj
 
+# --- JZ02V10 (THWC stick; build-only port, no unit yet) ---
+msm89xx/patches/869-arm64-dts-qcom-add-msm8916-thwc-jz02v10.patch  @akbar-npj
+diffconfigs/jz02v10                                                @akbar-npj
+# Four one-hot SIM lines, no hot-detect pulse: a separate service so the JZ02
+# sequence above stays untouched.
+msm89xx/base-files/etc/init.d/sim-select-jz02v10                   @akbar-npj
+
 # --- UZ801 config + everything else defaults to the lead ---
 diffconfigs/uz801  @isprogrammer @giraygokirmak @akbar-npj
 *  @akbar-npj

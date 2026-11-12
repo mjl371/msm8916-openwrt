@@ -1,0 +1,96 @@
+#!/bin/sh /etc/rc.common
+# JZ02V10 SIM-slot selector.
+#
+# This board exposes four independent SIM switch lines as gpio-leds (patch
+# 869), and exactly one line high selects the slot:
+#
+#   sim:sel   GPIO1   slot 1
+#   sim:en    GPIO20  slot 2
+#   sim:sel2  GPIO22  slot 3
+#   sim:en2   GPIO23  slot 4
+#
+# There is no hot-detect line: unlike the JZ02, nothing is pulsed, the slot is
+# simply held by one line.  Configure with:
+#
+#   uci set sim.slot=2 && uci commit sim     # 1..4, default 1
+#
+# The sibling /etc/init.d/sim-select handles the JZ02, whose three lines plus
+# re-announce pulse need a different sequence.  It exits immediately on this
+# board, and this service exits on every other board, so both can ship.
+#
+# BOARDS: jz02v10 only.
+
+START=20
+
+extra_command "status" "Report which SIM switch line is currently high"
+
+grep -q "jz02v10" /proc/device-tree/compatible 2>/dev/null || exit 0
+
+L=/sys/class/leds
+LINES="sim:sel sim:en sim:sel2 sim:en2"
+
+slot_lamp() {
+	case "$1" in
+		1) echo "sim:sel" ;;
+		2) echo "sim:en" ;;
+		3) echo "sim:sel2" ;;
+		4) echo "sim:en2" ;;
+	esac
+}
+
+lamp_slot() {
+	case "$1" in
+		sim:sel)  echo 1 ;;
+		sim:en)   echo 2 ;;
+		sim:sel2) echo 3 ;;
+		sim:en2)  echo 4 ;;
+	esac
+}
+
+start() {
+	local slot line
+
+	slot="$(uci -q get sim.slot 2>/dev/null)"
+	[ -n "$slot" ] || slot=1
+	case "$slot" in
+		1|2|3|4) ;;
+		*) logger -t sim-select-jz02v10 "invalid sim.slot '$slot' (expected 1..4); not selecting"
+		   return 1 ;;
+	esac
+
+	if [ ! -d "$L/sim:sel" ]; then
+		logger -t sim-select-jz02v10 "SIM switch GPIOs not present; skipping"
+		return 0
+	fi
+
+	# One-hot: drop every line first, then raise the selected slot's line.
+	for line in $LINES; do
+		echo 0 > "$L/$line/brightness"
+	done
+	echo 1 > "$L/$(slot_lamp "$slot")/brightness"
+
+	logger -t sim-select-jz02v10 "selected SIM slot $slot"
+}
+
+stop() {
+	:
+}
+
+status() {
+	local line lamp=""
+
+	for line in $LINES; do
+		[ -d "$L/$line" ] || { echo "SIM switch GPIOs not present"; return 1; }
+		[ "$(cat "$L/$line/brightness" 2>/dev/null)" = "1" ] && lamp="$lamp $line"
+	done
+	lamp="${lamp# }"
+
+	case "$lamp" in
+		"")     echo "no SIM switch line is high"
+			return 1 ;;
+		*" "*)  echo "several SIM lines are high ($lamp); the switch is not one-hot"
+			return 1 ;;
+	esac
+
+	echo "slot $(lamp_slot "$lamp") selected ($lamp)"
+}
